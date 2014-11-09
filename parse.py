@@ -76,13 +76,6 @@ act_scenes_text = [
 for i, act in enumerate(act_scenes_text):
   print 'Act', i+1, 'Length', len(act)
 
-[
-  [{'Othello': 'foo\n bar'}, {'Desdemona': ['boo', 'har']}], # ACT 1
-  [],
-  [],
-  []
-]
-
 acts = []
 for i, act in enumerate(act_scenes_text):
   acts.append([])
