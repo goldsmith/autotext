@@ -1,6 +1,7 @@
 import os
 import re
 import string
+import json
 
 from collections import defaultdict
 import itertools
@@ -60,6 +61,36 @@ CHARACTER_NICKNAMES = {
   'Bra': 'Brabrantio',
   'Within': 'Within'
 }
+CHARACTER_IS_MALE = {
+  'Clown': True,
+  'Musicians': True,
+  'Iago': True,
+  'Messenger': True, 
+  'Othello': True,
+  'Lodovico': True,
+  'Emilia': False,
+  'Gratiano': True,
+  'Cassio': True,
+  'Bianca': False,
+  'Rodorigo': True,
+  'Montano': True,
+  'Gentlemen': True,
+  'Desdemona': False,
+  'Herald': True,
+  'Officer': True,
+  'Duke': True,
+  'All': True,
+  'Senator': True,
+  'Within': False,
+  'Brabrantio': True
+}
+SCENES_PER_ACT = {
+  1: 3,
+  2: 3,
+  3: 4,
+  4: 3,
+  5: 2
+}
 STAGE_DIRECTIONS = ('Exeunt.', 'Exeunt')
 
 def unpunctuate(s):
@@ -81,7 +112,7 @@ for i, act in enumerate(act_scenes_text):
   acts.append([])
 
   for j, scene in enumerate(act):
-    acts[i].append(defaultdict(str))
+    acts[i].append(defaultdict(int))
 
     for line in scene.split('\r\n\r\n'):
       line = line.strip()
@@ -98,32 +129,33 @@ for i, act in enumerate(act_scenes_text):
       character = CHARACTER_NICKNAMES[character_nickname]
       rest_of_line = ''.join(re.split(START_OF_LINE_RE, line)[2:])
 
-      acts[i][j][character] += unpunctuate(rest_of_line).strip().lower() + ' '
+      acts[i][j][character] += 1
 
-NGRAM_SIZE = 3
-connections = defaultdict(set)
-def ngrams(input, n):
-  input = input.split(' ')
-  output = []
-  for i in range(len(input)-n+1):
-    output.append(' '.join(input[i:i+n]))
-  return output
+def scene_index(act, scene):
+  index = 0
+  for act_index in range(1, act):
+    index += SCENES_PER_ACT[act_index]
+  return index + scene
 
-for i, act in enumerate(acts):
-  for j, scene in enumerate(act):
-    for character, lines in scene.iteritems():
-      for ngram in ngrams(lines, NGRAM_SIZE):
-        connections[ngram].add(
-          'Act %s Scene %s' % (i+1, j+1)
-        )
+assert scene_index(1, 1) == 1
+assert scene_index(2, 1) == 4
+assert scene_index(4, 2) == 12
 
-# # clean out boring words
-# for combo in itertools.product(STOPWORDS, repeat=NGRAM_SIZE):
-#   stupid_thing = ' '.join(combo)
-#   if stupid_thing in connections:
-#     del connections[stupid_thing]
+def generate_jobs_data():
+  jobs_data = []
+  for i, act in enumerate(acts):
+    for j, scene in enumerate(act):
+      total_lines = float(sum(scene.values()))
+      for character in set(CHARACTER_NICKNAMES.values()):
+        jobs_data.append({
+          "job": character,
+          "year": scene_index(i + 1, j + 1),
+          "count": scene[character],
+          "perc": scene[character] / total_lines,
+          "sex": "men" if CHARACTER_IS_MALE[character] else "women"
+        })
+  return jobs_data
 
-for text, scenes in sorted(connections.iteritems(), key=lambda x: len(x[1])):
-  if len(scenes) > 1:
-    print text, scenes
-
+with open(os.path.abspath('./data.json'), ('r+')) as f:
+  json.dump(generate_jobs_data(), f, indent=4, separators=(',', ': '))
+  
