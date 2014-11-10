@@ -1,9 +1,10 @@
-{ "name": "DineExeter",
+{ 
+  "name": "autotext",
   "version": "0.1.0",
-  "description": "REST API for the Phillips Exeter mobile app",
+  "description": "automatic text to text connections in othello",
   "main": "index.js",
   "scripts": {
-    "start": "node index.js"
+    "start": "node server.js"
   },
   "keywords": {
     "node"
