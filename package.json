@@ -1,0 +1,12 @@
+{ "name": "DineExeter",
+  "version": "0.1.0",
+  "description": "REST API for the Phillips Exeter mobile app",
+  "main": "index.js",
+  "scripts": {
+    "start": "node index.js"
+  },
+  "keywords": {
+    "node"
+  },
+  "licence": "MIT"
+}
